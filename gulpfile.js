@@ -3,7 +3,8 @@ var gulp = require('gulp'),
     coffee = require('gulp-coffee')
     debug = require('gulp-debug'),
     concat = require('gulp-concat'),
-    browserify = require('gulp-browserify');
+    browserify = require('gulp-browserify'),
+    compass = require('gulp-compass');
 
 var coffeeSources = ['components/coffee/*.coffee'];
 var jsSources = [
@@ -12,6 +13,7 @@ var jsSources = [
   'components/scripts/tagline.js',
   'components/scripts/template.js'
 ];
+var sassSources = ['components/sass/style.scss'];
 
 gulp.task('coffee', function() {
   gulp.src(coffeeSources)
@@ -31,7 +33,23 @@ gulp.task('js', function() {
     .pipe(browserify())
     .pipe(gulp.dest('builds/development/js')
       .on('end', function() {
-        gutil.log('JS files concatenated and added to scripts folder');
+        gutil.log('JS files concatenated and added to DEV scripts folder');
+      })
+    );
+});
+
+gulp.task('sass', function() {
+  gulp.src(sassSources)
+    .pipe(debug())
+    .pipe(compass({
+      sass: 'components/sass',
+      images: 'builds/development/images',
+      style: 'expanded'
+    })
+      .on('error', gutil.log))
+    .pipe(gulp.dest('builds/development/css')
+      .on('end', function() {
+        gutil.log('Sass files built and added to DEV css folder');
       })
     );
 });

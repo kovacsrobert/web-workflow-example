@@ -45,3 +45,9 @@ gulp.task('sass', function() {
 gulp.task('build', ['coffee', 'js', 'sass']);
 
 gulp.task('default', ['build']);
+
+gulp.task('watch', function() {
+  gulp.watch(coffeeSources, ['coffee']);
+  gulp.watch(jsSources, ['js']);
+  gulp.watch('components/sass/*.scss', ['sass']);
+});

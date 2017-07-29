@@ -20,10 +20,7 @@ gulp.task('coffee', function() {
     .pipe(debug())
     .pipe(coffee({bare:true})
       .on('error', gutil.log))
-    .pipe(gulp.dest('components/scripts')
-      .on('end', function() {
-        gutil.log('Coffee files added to scripts folder');
-      }));
+    .pipe(gulp.dest('components/scripts'));
 });
 
 gulp.task('js', function() {
@@ -31,11 +28,7 @@ gulp.task('js', function() {
     .pipe(debug())
     .pipe(concat('script.js'))
     .pipe(browserify())
-    .pipe(gulp.dest('builds/development/js')
-      .on('end', function() {
-        gutil.log('JS files concatenated and added to DEV scripts folder');
-      })
-    );
+    .pipe(gulp.dest('builds/development/js'));
 });
 
 gulp.task('sass', function() {
@@ -45,11 +38,10 @@ gulp.task('sass', function() {
       sass: 'components/sass',
       images: 'builds/development/images',
       style: 'expanded'
-    })
-      .on('error', gutil.log))
-    .pipe(gulp.dest('builds/development/css')
-      .on('end', function() {
-        gutil.log('Sass files built and added to DEV css folder');
-      })
-    );
+    }).on('error', gutil.log))
+    .pipe(gulp.dest('builds/development/css'));
 });
+
+gulp.task('build', ['coffee', 'js', 'sass']);
+
+gulp.task('default', ['build']);

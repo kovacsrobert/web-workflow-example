@@ -8,7 +8,8 @@ var gulp = require('gulp'),
     connect = require('gulp-connect'),
     gulpif = require('gulp-if'),
     uglify = require('gulp-uglify'),
-    minifyHTML = require('gulp-minify-html');
+    minifyHTML = require('gulp-minify-html')
+    jsonminify = require('gulp-jsonminify');
 
 var devConfig = {
   env: 'development',
@@ -39,7 +40,7 @@ var prodConfig = {
   sassSources: ['components/sass/style.scss'],
   allSassSources: ['components/sass/*.scss'],
   htmlSources: ['builds/development/*.html'], // use dev html sources
-  jsonSources: ['builds/production/js/*.json'],
+  jsonSources: ['builds/development/js/*.json'], // use dev json sources
   sassStyle: 'compressed'
 };
 var env = process.env.NODE_ENV || 'development';
@@ -60,6 +61,8 @@ gulp.task('html', function() {
 gulp.task('json', function() {
   gulp.src(config.jsonSources)
     .pipe(debug())
+    .pipe(gulpif(config.env === prodConfig.env, jsonminify()))
+    .pipe(gulpif(config.env === prodConfig.env, gulp.dest(config.outputDir + 'js')))
     .pipe(connect.reload());
 });
 

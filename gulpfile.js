@@ -7,7 +7,8 @@ var gulp = require('gulp'),
     compass = require('gulp-compass'),
     connect = require('gulp-connect'),
     gulpif = require('gulp-if'),
-    uglify = require('gulp-uglify');
+    uglify = require('gulp-uglify'),
+    minifyHTML = require('gulp-minify-html');
 
 var devConfig = {
   env: 'development',
@@ -37,7 +38,7 @@ var prodConfig = {
   ],
   sassSources: ['components/sass/style.scss'],
   allSassSources: ['components/sass/*.scss'],
-  htmlSources: ['builds/production/*.html'],
+  htmlSources: ['builds/development/*.html'], // use dev html sources
   jsonSources: ['builds/production/js/*.json'],
   sassStyle: 'compressed'
 };
@@ -51,6 +52,8 @@ gutil.log('env-input: \"' + env + '\", env-config: ' + config.env);
 gulp.task('html', function() {
   gulp.src(config.htmlSources)
     .pipe(debug())
+    .pipe(gulpif(config.env === prodConfig.env, minifyHTML()))
+    .pipe(gulpif(config.env === prodConfig.env, gulp.dest(config.outputDir)))
     .pipe(connect.reload());
 });
 

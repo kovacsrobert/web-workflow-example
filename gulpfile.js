@@ -7,31 +7,59 @@ var gulp = require('gulp'),
     compass = require('gulp-compass'),
     connect = require('gulp-connect');
 
-var coffeeSources = ['components/coffee/*.coffee'];
-var jsSources = [
-  'components/scripts/rclick.js',
-  'components/scripts/pixgrid.js',
-  'components/scripts/tagline.js',
-  'components/scripts/template.js'
-];
-var sassSources = ['components/sass/style.scss'];
-var htmlSources = ['builds/development/*.html'];
-var jsonSources = ['builds/development/js/*.json'];
+var devConfig = {
+  env: 'development',
+  outputDir: 'builds/development/',
+  coffeeSources: ['components/coffee/*.coffee'],
+  jsSources: [
+    'components/scripts/rclick.js',
+    'components/scripts/pixgrid.js',
+    'components/scripts/tagline.js',
+    'components/scripts/template.js'
+  ],
+  sassSources: ['components/sass/style.scss'],
+  allSassSources: ['components/sass/*.scss'],
+  htmlSources: ['builds/development/*.html'],
+  jsonSources: ['builds/development/js/*.json'],
+  sassStyle: 'expanded'
+};
+var prodConfig = {
+  env: 'production',
+  outputDir: 'builds/production/',
+  coffeeSources: ['components/coffee/*.coffee'],
+  jsSources: [
+    'components/scripts/rclick.js',
+    'components/scripts/pixgrid.js',
+    'components/scripts/tagline.js',
+    'components/scripts/template.js'
+  ],
+  sassSources: ['components/sass/style.scss'],
+  allSassSources: ['components/sass/*.scss'],
+  htmlSources: ['builds/production/*.html'],
+  jsonSources: ['builds/production/js/*.json'],
+  sassStyle: 'compressed'
+};
+var env = process.env.NODE_ENV || 'development';
+var config = (env === 'production' || env === 'prod' || env === 'p' || env === 'P')
+  ? prodConfig
+  : devConfig ;
+
+gutil.log('Environment:' + env + ', config: ' + config.env);
 
 gulp.task('html', function() {
-  gulp.src(htmlSources)
+  gulp.src(config.htmlSources)
     .pipe(debug())
     .pipe(connect.reload());
 });
 
 gulp.task('json', function() {
-  gulp.src(jsonSources)
+  gulp.src(config.jsonSources)
     .pipe(debug())
     .pipe(connect.reload());
 });
 
 gulp.task('coffee', function() {
-  gulp.src(coffeeSources)
+  gulp.src(config.coffeeSources)
     .pipe(debug())
     .pipe(coffee({bare:true})
       .on('error', gutil.log))
@@ -39,40 +67,40 @@ gulp.task('coffee', function() {
 });
 
 gulp.task('js', function() {
-  gulp.src(jsSources)
+  gulp.src(config.jsSources)
     .pipe(debug())
     .pipe(concat('script.js'))
     .pipe(browserify())
-    .pipe(gulp.dest('builds/development/js'))
+    .pipe(gulp.dest(config.outputDir + 'js'))
     .pipe(connect.reload());
 });
 
 gulp.task('sass', function() {
-  gulp.src(sassSources)
+  gulp.src(config.sassSources)
     .pipe(debug())
     .pipe(compass({
       sass: 'components/sass',
-      images: 'builds/development/images',
-      style: 'expanded'
+      images: config.outputDir + 'images',
+      style: config.sassStyle
     }).on('error', gutil.log))
-    .pipe(gulp.dest('builds/development/css'))
+    .pipe(gulp.dest(config.outputDir + 'css'))
     .pipe(connect.reload());
 });
 
 gulp.task('connect', function() {
   connect.server({
-    root: 'builds/development',
+    root: config.outputDir,
     livereload: true,
     debug: true
   });
 });
 
 gulp.task('watch', function() {
-  gulp.watch(coffeeSources, ['coffee']);
-  gulp.watch(jsSources, ['js']);
-  gulp.watch(['components/sass/*.scss'], ['sass']);
-  gulp.watch(htmlSources, ['html']);
-  gulp.watch(jsonSources, ['json']);
+  gulp.watch(config.coffeeSources, ['coffee']);
+  gulp.watch(config.jsSources, ['js']);
+  gulp.watch(config.allSassSources, ['sass']);
+  gulp.watch(config.htmlSources, ['html']);
+  gulp.watch(config.jsonSources, ['json']);
 });
 
 gulp.task('build', ['connect', 'coffee', 'js', 'sass','json', 'html', 'watch']);

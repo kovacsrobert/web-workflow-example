@@ -9,7 +9,9 @@ var gulp = require('gulp'),
     gulpif = require('gulp-if'),
     uglify = require('gulp-uglify'),
     minifyHTML = require('gulp-minify-html')
-    jsonminify = require('gulp-jsonminify');
+    jsonminify = require('gulp-jsonminify'),
+    imagemin = require('gulp-imagemin'),
+    pngcrush = require('imagemin-pngcrush');
 
 var devConfig = {
   env: 'development',
@@ -25,6 +27,7 @@ var devConfig = {
   allSassSources: ['components/sass/*.scss'],
   htmlSources: ['builds/development/*.html'],
   jsonSources: ['builds/development/js/*.json'],
+  imageSources: ['builds/development/images/**/*.*'],
   sassStyle: 'expanded'
 };
 var prodConfig = {
@@ -41,6 +44,7 @@ var prodConfig = {
   allSassSources: ['components/sass/*.scss'],
   htmlSources: ['builds/development/*.html'], // use dev html sources
   jsonSources: ['builds/development/js/*.json'], // use dev json sources
+  imageSources: ['builds/development/images/**/*.*'], // use dev image sources
   sassStyle: 'compressed'
 };
 var env = process.env.NODE_ENV || 'development';
@@ -49,6 +53,18 @@ var config = (env === 'production' || env === 'prod' || env === 'p' || env === '
   : devConfig ;
 
 gutil.log('env-input: \"' + env + '\", env-config: ' + config.env);
+
+gulp.task('images', function() {
+  gulp.src(config.imageSources)
+    .pipe(debug())
+    .pipe(gulpif(config.env === prodConfig.env, imagemin({
+      progressive: true,
+      svgoPlugins: [{removeViewBox: false}],
+      use: [pngcrush()]
+    })))
+    .pipe(gulpif(config.env === prodConfig.env, gulp.dest(config.outputDir + 'images')))
+    .pipe(connect.reload());
+});
 
 gulp.task('html', function() {
   gulp.src(config.htmlSources)
@@ -112,6 +128,6 @@ gulp.task('watch', function() {
   gulp.watch(config.jsonSources, ['json']);
 });
 
-gulp.task('build', ['connect', 'coffee', 'js', 'sass','json', 'html', 'watch']);
+gulp.task('build', ['connect', 'coffee', 'js', 'sass','json', 'html', 'images', 'watch']);
 
 gulp.task('default', ['build']);

@@ -16,9 +16,16 @@ var jsSources = [
 ];
 var sassSources = ['components/sass/style.scss'];
 var htmlSources = ['builds/development/*.html'];
+var jsonSources = ['builds/development/js/*.json'];
 
 gulp.task('html', function() {
   gulp.src(htmlSources)
+    .pipe(debug())
+    .pipe(connect.reload());
+});
+
+gulp.task('json', function() {
+  gulp.src(jsonSources)
     .pipe(debug())
     .pipe(connect.reload());
 });
@@ -65,8 +72,9 @@ gulp.task('watch', function() {
   gulp.watch(jsSources, ['js']);
   gulp.watch(['components/sass/*.scss'], ['sass']);
   gulp.watch(htmlSources, ['html']);
+  gulp.watch(jsonSources, ['json']);
 });
 
-gulp.task('build', ['connect', 'coffee', 'js', 'sass', 'watch']);
+gulp.task('build', ['connect', 'coffee', 'js', 'sass','json', 'html', 'watch']);
 
 gulp.task('default', ['build']);

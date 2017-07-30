@@ -5,7 +5,9 @@ var gulp = require('gulp'),
     concat = require('gulp-concat'),
     browserify = require('gulp-browserify'),
     compass = require('gulp-compass'),
-    connect = require('gulp-connect');
+    connect = require('gulp-connect'),
+    gulpif = require('gulp-if'),
+    uglify = require('gulp-uglify');
 
 var devConfig = {
   env: 'development',
@@ -44,7 +46,7 @@ var config = (env === 'production' || env === 'prod' || env === 'p' || env === '
   ? prodConfig
   : devConfig ;
 
-gutil.log('Environment:' + env + ', config: ' + config.env);
+gutil.log('env-input: \"' + env + '\", env-config: ' + config.env);
 
 gulp.task('html', function() {
   gulp.src(config.htmlSources)
@@ -71,6 +73,7 @@ gulp.task('js', function() {
     .pipe(debug())
     .pipe(concat('script.js'))
     .pipe(browserify())
+    .pipe(gulpif(config.env === prodConfig.env, uglify()))
     .pipe(gulp.dest(config.outputDir + 'js'))
     .pipe(connect.reload());
 });
